@@ -1,0 +1,5 @@
+SPOTIFY_BASE_URL = "https://api.spotify.com/v1"
+SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token"
+SPOTIFY_AUTH_URL = "https://accounts.spotify.com/authorize"
+REDIRECT_URI = "http://127.0.0.1:8080/callback"
+REQUIRED_API_SCOPE_PERMISSIONS = "user-read-private user-read-email"

@@ -26,11 +26,11 @@ def define_resources(client: RESTClient, max_items: int = None) -> list[dlt.reso
                     seen_entities.add(entity_id)
                     yield client.get(f"{entity_type}/{entity_id}").json()
 
-    @dlt.resource(name="tracks", max_table_nesting=1, write_disposition="replace")
+    @dlt.resource(name="tracks", max_table_nesting=1, write_disposition={"disposition": "merge", "strategy": "scd2"})
     def tracks():
         yield from fetch_unique_entities_from_recent_tracks("/tracks", lambda r: [r])
 
-    @dlt.resource(name="artists", max_table_nesting=1)
+    @dlt.resource(name="artists", max_table_nesting=1, write_disposition={"disposition": "merge", "strategy": "scd2"})
     def artists():
         yield from fetch_unique_entities_from_recent_tracks("/artists", lambda r: r["artists"])
 

@@ -8,7 +8,7 @@ def main(max_items: int, destination: str) -> None:
     resources = define_resources(client, max_items=max_items)
 
     pipeline = dlt.pipeline(
-        pipeline_name="spotify_dlt_pipeline",
+        pipeline_name="spotify_dlt_pipeline_scd2",
         destination=destination,
         dataset_name="spotify_data",
         progress="tqdm",
@@ -26,5 +26,5 @@ if __name__ == "__main__":
 
     # When debugging, after this has ran, you can check the locally generated DuckDB database for the ingested data.
     # Dlt comes with a premade streamlit application for exploring the ingested data accessed with `dlt <pipeline_name> show`
-    destination = "duckdb" if not args.debug else "databricks"
+    destination = "duckdb" if args.debug else "databricks"
     main(max_items=args.max_items, destination=destination)

@@ -1,37 +1,42 @@
-from typing import Generator
-
 import dlt
 from dlt.sources.helpers.rest_client import RESTClient
-
+import time
 
 def define_resources(client: RESTClient, max_items: int = None) -> list[dlt.resource]:
-    """Returns a list of DLT resources using the provided client and max_items limit."""
-    @dlt.resource(name="recently_played_tracks", max_table_nesting=0)
-    def recently_played_tracks():
+    """
+    Returns a list of DLT resources using the provided client and max_items limit.
+    
+    By default, failing requests are retried up to 5 times with an exponentially increasing delay. 
+    That means the first retry will wait 1 second, and the fifth retry will wait 16 seconds.
+    """
+
+    @dlt.resource(name="recently_played_tracks", write_disposition="replace")
+    def recently_played_track_entries():
         total_tracks_fetched = 0
+
         for page in client.paginate("/me/player/recently-played"):
-            for item in page:
-                track = item["track"]
-                yield track
+            for entry in page:
+                yield entry
                 total_tracks_fetched += 1
+                time.sleep(1)  # To avoid hitting rate limits (I have gotten a 24/hr ban :))
+
                 if max_items and total_tracks_fetched >= max_items:
                     return
 
-    def fetch_unique_entities_from_recent_tracks(entity_type: str, id_getter: callable) -> Generator:
-        seen_entities = set()
-        for record in recently_played_tracks():
-            for entity in id_getter(record):
-                entity_id = entity["id"]
-                if entity_id not in seen_entities:
-                    seen_entities.add(entity_id)
-                    yield client.get(f"{entity_type}/{entity_id}").json()
+    @dlt.transformer(data_from=recently_played_track_entries, name="albums", write_disposition={"disposition": "merge", "strategy": "scd2"})
+    def albums(entry):
+        album_id = entry["track"]["album"]["id"]
+        album = client.get(f"/albums/{album_id}").json()
+        yield album
+        time.sleep(1)  # To avoid hitting rate limits (I have gotten a 24/hr ban :))
 
-    @dlt.resource(name="tracks", max_table_nesting=1, write_disposition={"disposition": "merge", "strategy": "scd2"})
-    def tracks():
-        yield from fetch_unique_entities_from_recent_tracks("/tracks", lambda r: [r])
+    @dlt.transformer(data_from=recently_played_track_entries, name="artists", write_disposition={"disposition": "merge", "strategy": "scd2"})
+    def artists(entry):
+        artists = entry["track"]["artists"]
+        for artist in artists:
+            artist_id = artist["id"]
+            artist = client.get(f"/artists/{artist_id}").json()
+            yield artist
+            time.sleep(1)  # To avoid hitting rate limits (I have gotten a 24/hr ban :))
 
-    @dlt.resource(name="artists", max_table_nesting=1, write_disposition={"disposition": "merge", "strategy": "scd2"})
-    def artists():
-        yield from fetch_unique_entities_from_recent_tracks("/artists", lambda r: r["artists"])
-
-    return [recently_played_tracks(), tracks(), artists()]
+    return [recently_played_track_entries.add_limit, albums, artists]

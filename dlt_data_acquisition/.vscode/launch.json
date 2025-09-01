@@ -5,13 +5,27 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Run debug pipeline",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/pipeline.py",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "--debug",
+            ],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "console": "integratedTerminal"
+        },
+        {
             "name": "Run pipeline",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/pipeline.py",
             "cwd": "${workspaceFolder}",
             "args": [
-                "--debug"
+                "--max_items", "500"
             ],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"

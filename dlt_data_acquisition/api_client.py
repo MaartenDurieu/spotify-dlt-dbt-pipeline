@@ -40,6 +40,6 @@ def create_spotify_client() -> RESTClient:
 
     Even though the documentation states otherwise, no total is returned on some of the API responses, so it has to be set to None.
     """
-    paginator = OffsetPaginator(limit=20, offset=0, offset_param="offset", limit_param="limit", total_path=None, stop_after_empty_page=True)
+    paginator = OffsetPaginator(limit=50, offset=0, offset_param="offset", limit_param="limit", total_path=None, stop_after_empty_page=True)
 
     return RESTClient(base_url=SPOTIFY_BASE_URL, auth=BearerTokenAuth(token=request_access_token()), paginator=paginator)

@@ -39,4 +39,4 @@ def define_resources(client: RESTClient, max_items: int = None) -> list[dlt.reso
             yield artist
             time.sleep(1)  # To avoid hitting rate limits (I have gotten a 24/hr ban :))
 
-    return [recently_played_track_entries.add_limit, albums, artists]
+    return [recently_played_track_entries, albums, artists]

@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: spotify_data
+    schema: spotify_data # Matches the defintion in duckdb
+    tables:
+      - name: artists
+      - name: tracks
+      - name: recently_played_tracks
+      - name: albums
+      - name: artists__genres

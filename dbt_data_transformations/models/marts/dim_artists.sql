@@ -1,0 +1,44 @@
+{{ config(materialized='table') }}
+
+WITH artist_genres AS (
+    SELECT
+        a.id AS artist_id,
+        a.followers__total AS followers,
+        a.name AS artist_name,
+        a.type AS artist_type,
+        a.popularity AS popularity_score,
+        a.external_urls__spotify AS spotify_url,
+        a._dlt_valid_from AS version_start,
+        a._dlt_valid_to AS version_end,
+        g.value AS genre
+    FROM {{ source('spotify_data', 'artists') }} a
+    LEFT JOIN {{ source('spotify_data', 'artists__genres') }} g
+        ON a._dlt_id = g._dlt_parent_id
+)
+SELECT
+    artist_id,
+    followers,
+    artist_name,
+    artist_type,
+    popularity_score,
+    CASE 
+        WHEN popularity_score BETWEEN 0 AND 24 THEN 'Hidden Gem'
+        WHEN popularity_score BETWEEN 25 AND 49 THEN 'Rising Star'
+        WHEN popularity_score BETWEEN 50 AND 74 THEN 'Known Favorite'
+        WHEN popularity_score BETWEEN 75 AND 100 THEN 'Chart Topper'
+        ELSE 'Unknown'
+    END AS popularity_label,
+    spotify_url,
+    version_start,
+    version_end,
+    STRING_AGG(DISTINCT genre, ', ') AS genres
+FROM artist_genres
+GROUP BY
+    artist_id,
+    followers,
+    artist_name,
+    artist_type,
+    popularity_score,
+    spotify_url,
+    version_start,
+    version_end

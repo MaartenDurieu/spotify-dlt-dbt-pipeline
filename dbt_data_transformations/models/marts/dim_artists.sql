@@ -16,18 +16,13 @@ WITH artist_genres AS (
         ON a._dlt_id = g._dlt_parent_id
 )
 SELECT
+    {{ dbt_utils.generate_surrogate_key(['artist_id', 'version_start']) }} AS artist_pk,
     artist_id,
     followers,
     artist_name,
     artist_type,
     popularity_score,
-    CASE 
-        WHEN popularity_score BETWEEN 0 AND 24 THEN 'Hidden Gem'
-        WHEN popularity_score BETWEEN 25 AND 49 THEN 'Rising Star'
-        WHEN popularity_score BETWEEN 50 AND 74 THEN 'Known Favorite'
-        WHEN popularity_score BETWEEN 75 AND 100 THEN 'Chart Topper'
-        ELSE 'Unknown'
-    END AS popularity_label,
+    {{ spotify_popularity_label('popularity_score', 'popularity_label') }},
     spotify_url,
     version_start,
     version_end,

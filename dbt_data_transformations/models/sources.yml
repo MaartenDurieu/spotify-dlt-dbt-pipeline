@@ -9,3 +9,4 @@ sources:
       - name: recently_played_tracks
       - name: albums
       - name: artists__genres
+      - name: recently_played_tracks__track__artists

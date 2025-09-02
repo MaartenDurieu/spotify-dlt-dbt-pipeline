@@ -1,19 +1,20 @@
-{{ config(materialized='table') }}
+{{
+    config(
+        materialized='table'
+    )
+}}
 
-select distinct
+SELECT
+    {{ dbt_utils.generate_surrogate_key(['track__id']) }} AS track_key,
     track__id as track_id,
     track__name as track_name,
     track__track_number as track_number,
     track__duration_ms as duration_ms,
-    track__duration_ms / 60000.0 as track_duration_minutes,
+    track__duration_ms / 60000.0 AS track_duration_minutes,
     track__explicit as is_explicit,
     track__external_ids__isrc as isrc,
     track__popularity as popularity,
-    case 
-        when track__popularity >= 75 then 'High'
-        when track__popularity >= 50 then 'Medium'
-        else 'Low'
-    end as track_popularity_bucket,
-    track__album__id as album_id,
-from {{ source('spotify_data', 'recently_played_tracks') }}
-where track__id is not null
+    {{ spotify_popularity_label('track__popularity', 'track_popularity_bucket') }},
+    track__album__id as album_id
+FROM {{ source('spotify_data', 'recently_played_tracks') }}
+WHERE track__id IS NOT NULL

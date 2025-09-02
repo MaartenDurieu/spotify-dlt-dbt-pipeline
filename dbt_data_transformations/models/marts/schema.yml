@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: bridge_played_track_artists
+    description: "Bridge table linking recently played tracks to their artists."
+    columns:
+      - name: listening_history_id
+        description: "References the primary key of the fact_listening_history table."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                column_name: listening_history_id
+                to: ref('fact_listening_history')
+                field: dlt_pk
+      - name: artist_id
+        description: "References the artist in dim_artists."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                column_name: artist_id
+                to: ref('dim_artists')
+                field: artist_id
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - listening_history_id
+            - artist_id

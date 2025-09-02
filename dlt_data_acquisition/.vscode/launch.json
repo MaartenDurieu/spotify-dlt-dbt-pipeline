@@ -25,7 +25,7 @@
             "program": "${workspaceFolder}/pipeline.py",
             "cwd": "${workspaceFolder}",
             "args": [
-                "--max_items", "500"
+                "--max_items", "50"
             ],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"

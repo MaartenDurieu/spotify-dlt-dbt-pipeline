@@ -1,5 +1,3 @@
-# put your configuration values here
-
 [runtime]
 log_level="WARNING"  # the system log level of dlt
 request_max_attempts = 10  # Stop after 10 retry attempts instead of 5

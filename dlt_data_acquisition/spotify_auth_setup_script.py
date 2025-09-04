@@ -43,8 +43,8 @@ def callback():
     response = requests.post(SPOTIFY_TOKEN_URL, data=token_data, headers=token_headers)
     response_data = response.json()
 
-    if "access_token" not in response_data:
-        return f"Error getting token: {response_data}"
+    if response.status_code != 200:
+        raise Exception(f"Failed to get token: {response_data}")
 
     access_token = response_data["access_token"]
     refresh_token = response_data.get("refresh_token")
